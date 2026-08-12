@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeuroPed-Hub | Dr. Giovani Petró</title>
+<style>
+  /* --- VISUAL (Design do Netlify Adaptado) --- */
+  :root {
+    --primary: #0f172a;
+    --primary-light: #1e293b;
+    --accent: #0284c7;
+    --bg-color: #f8fafc;
+    --card-bg: #ffffff;
+    --text-main: #334155;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+  }
+  
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; line-height: 1.5; }
+  
+  /* Cabeçalho */
+  .site-header { background-color: var(--primary); color: white; padding: 40px 20px; text-align: center; }
+  .header-inner { display: flex; justify-content: center; align-items: center; margin-bottom: 30px; }
+  .brand { display: flex; align-items: center; gap: 15px; }
+  .brand-mark { color: #38bdf8; }
+  .brand-text h1 { margin: 0; font-size: 32px; letter-spacing: -0.5px; }
+  .subtitle { margin: 5px 0 0 0; color: #94a3b8; font-size: 16px; font-weight: 500; }
+  
+  /* Barra de Busca */
+  .search-bar-wrap { max-width: 600px; margin: 0 auto; position: relative; }
+  .search-bar { display: flex; align-items: center; background: white; border-radius: 50px; padding: 5px 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 2px solid transparent; transition: 0.3s; }
+  .search-bar:focus-within { border-color: var(--accent); box-shadow: 0 10px 25px rgba(2, 132, 199, 0.2); }
+  .search-icon { color: #94a3b8; flex-shrink: 0; }
+  #searchInput { border: none; outline: none; padding: 15px 10px; width: 100%; font-size: 16px; color: var(--primary); background: transparent; }
+  .clear-btn { background: none; border: none; font-size: 24px; color: #94a3b8; cursor: pointer; padding: 0 10px; }
+  .clear-btn:hover { color: #ef4444; }
+  .result-count { color: #94a3b8; font-size: 13px; margin-top: 10px; }
+
+  /* Corpo Principal */
+  #main-content { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+  
+  /* Categorias */
+  .category-section { margin-bottom: 50px; }
+  .category-header { display: flex; align-items: baseline; gap: 10px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; margin-bottom: 20px; }
+  .category-title { font-size: 22px; color: var(--primary-light); margin: 0; font-weight: 700; }
+  .category-count { font-size: 13px; background: #e2e8f0; color: #475569; padding: 4px 10px; border-radius: 20px; font-weight: bold; }
+  
+  /* Grid e Cartões */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+  .app-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; text-decoration: none; display: flex; flex-direction: column; transition: all 0.2s ease; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+  .app-card:hover { transform: translateY(-3px); border-color: var(--accent); box-shadow: 0 10px 15px rgba(0,0,0,0.05); }
+  .app-title { font-size: 16px; font-weight: 700; color: var(--accent); margin-bottom: 8px; }
+  .app-desc { font-size: 13px; color: var(--text-muted); line-height: 1.5; margin: 0; }
+  
+  .hidden { display: none !important; }
+  .empty-state { text-align: center; color: var(--text-muted); font-size: 18px; padding: 50px 20px; background: white; border-radius: 12px; border: 1px dashed var(--border-color); }
+
+  .site-footer { text-align: center; padding: 30px 20px; color: var(--text-muted); font-size: 13px; border-top: 1px solid var(--border-color); margin-top: 40px; }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 48 48" width="38" height="38" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="24" cy="24" r="22" stroke="currentColor" stroke-width="2"/>
+          <path d="M14 26c1.5-6 4-9 6-9s2.5 5 4 5 2-7 4-7 3 8 4 8 2-3 4-3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <div class="brand-text">
+        <h1>NeuroPed-Hub</h1>
+        <p class="subtitle">Dr. Giovani Anton Petró — Neuropediatra</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="search-bar-wrap">
+    <div class="search-bar">
+      <svg class="search-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/>
+        <path d="M20 20l-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <input id="searchInput" type="text" placeholder="Buscar escala (ex.: autismo, sono, motor)..." autocomplete="off" />
+      <button id="clearSearch" class="clear-btn" hidden>&times;</button>
+    </div>
+    <p id="resultCount" class="result-count"></p>
+  </div>
+</header>
+
+<main id="main-content">
+  <div id="categoriesContainer"></div>
+  <p id="emptyState" class="empty-state" hidden>Nenhuma escala encontrada para essa busca.</p>
+</main>
+
+<footer class="site-footer">
+  <p>NeuroPed-Hub &middot; Uso clínico interno &middot; Ambulatório de Neuropediatria HUSM</p>
+</footer>
+
+<script>
+  /* --- INTELIGÊNCIA DE DADOS E BUSCA (JS do Netlify Adaptado) --- */
+  
+  // Base de Dados com todas as escalas que o senhor listou
+  const scalesData = [
+    {
+      category: "Autismo e Neurodesenvolvimento",
+      apps: [
+        { title: "M-CHAT-R/F", desc: "Rastreamento de risco para Transtorno do Espectro Autista em crianças de 16 a 30 meses.", tags: "autismo tea rastreio", href: "m-chat.html" },
+        { title: "CARS 2", desc: "Escala de classificação de autismo infantil. Avalia gravidade e características.", tags: "autismo tea gravidade", href: "CARS.html" },
+        { title: "ADOS-2", desc: "Protocolo de observação diagnóstica estruturada para autismo.", tags: "autismo tea observacao", href: "ADOS-2.html" },
+        { title: "SRS-2", desc: "Escala de Responsividade Social. Mede traços de dificuldades sociais.", tags: "autismo tea social", href: "Calculadora Auxiliar SRS-2.html" },
+        { title: "SCQ", desc: "Questionário de Comunicação Social. Triagem rápida por relato parental.", tags: "autismo tea triagem", href: "SCQ.html" },
+        { title: "ATEC", desc: "Checklist de Tratamento de Autismo. Acompanha resposta a intervenções.", tags: "autismo evolucao", href: "ATEC.html" },
+        { title: "Vineland-3", desc: "Escala de Comportamento Adaptativo. Avalia comunicação, vida diária e socialização.", tags: "adaptativo funcionalidade di", href: "VABS-3.html" },
+        { title: "Denver II", desc: "Teste de Triagem de Desenvolvimento. Rastreia motor, linguagem e social.", tags: "desenvolvimento dnpm atraso", href: "App do Denver II.html" },
+        { title: "AQ-Child", desc: "Quociente do Espectro Autista. Rastreio para suspeita de TEA nível 1 escolar.", tags: "autismo tea rastreio escolar", href: "AQ-Child.html" },
+        { title: "ASQ-3", desc: "Triagem parental do desenvolvimento neuropsicomotor por faixa etária.", tags: "desenvolvimento dnpm", href: "ASQ-3.html" },
+        { title: "ATA", desc: "Avalia a presença e intensidade de traços autísticos (TEA).", tags: "autismo tea tracos", href: "ATA.html" },
+        { title: "Bayley-III", desc: "Avalia desenvolvimento cognitivo, motor e de linguagem em bebês.", tags: "desenvolvimento bebes", href: "Bayley-III.html" },
+        { title: "PEP-3", desc: "Perfil Psicoeducacional. Avalia habilidades de crianças com autismo.", tags: "autismo habilidades", href: "PEP-3.html" },
+        { title: "GARS-3", desc: "Identifica e mede a gravidade de sintomas de autismo.", tags: "autismo gravidade", href: "GARS-3.html" },
+        { title: "CASD", desc: "Checklist diagnóstico rápido para sintomas de TEA.", tags: "autismo checklist", href: "CASD.html" },
+        { title: "CAM-B 10-14", desc: "Rastreia masking social e burnout autista na pré-adolescência.", tags: "autismo masking burnout", href: "CAM-B.html" },
+        { title: "DD-CGAS", desc: "Mede o nível global de funcionamento em transtornos do desenvolvimento.", tags: "funcionalidade global", href: "DD-CGAS.html" }
+      ]
+    },
+    {
+      category: "Comportamento e Sono",
+      apps: [
+        { title: "SDQ", desc: "Rastreia problemas emocionais, comportamentais e de conduta.", tags: "emocional conduta", href: "SDQ.html" },
+        { title: "CBCL 1½-5 Anos", desc: "Inventário de Comportamentos para Pré-Escolares (99 itens).", tags: "comportamento pre escolar", href: "CBCL pré-escolar.html" },
+        { title: "CBCL 6-18 Anos", desc: "Inventário de Comportamentos para Escolares (113 itens).", tags: "comportamento escolar", href: "CBCL Escolar.html" },
+        { title: "Conners 3", desc: "Escala de avaliação de TDAH. Mede desatenção e hiperatividade.", tags: "tdah desatencao", href: "Conners.html" },
+        { title: "SNAP-IV", desc: "Rastreamento de sintomas de TDAH e oposição desafiadora.", tags: "tdah tod", href: "snap.html" },
+        { title: "Vanderbilt", desc: "Avalia sintomas de TDAH em contexto escolar e familiar.", tags: "tdah escolar", href: "NICHQ Vanderbilt.html" },
+        { title: "ADHD-RS-5", desc: "Avalia sintomas de TDAH como alternativa ao SNAP-IV.", tags: "tdah alternativa", href: "ADHD-RS-5.html" },
+        { title: "ASRS-18", desc: "Rastreia sintomas de TDAH em adolescentes e adultos.", tags: "tdah adultos", href: "asrs18.html" },
+        { title: "ARI", desc: "Diferencia irritabilidade em TDAH, TOD e TDDH.", tags: "irritabilidade tod tddh", href: "ARI.html" },
+        { title: "CSHQ", desc: "Avalia distúrbios e rotina de sono em crianças.", tags: "sono distúrbios", href: "CSHQ.html" },
+        { title: "BISQ", desc: "Rastreia padrões de sono e despertares noturnos em bebês.", tags: "sono bebes", href: "BISQ.html" },
+        { title: "Epworth (Pediátrica)", desc: "Mede o grau de sonolência diurna excessiva.", tags: "sono sonolencia", href: "ESS-CH.html" },
+        { title: "ABC", desc: "Avalia irritabilidade, letargia, agressividade e hiperatividade.", tags: "comportamento aberrante agressividade", href: "ABC.html" },
+        { title: "CY-BOCS", desc: "Mede a gravidade de sintomas obsessivo-compulsivos (TOC).", tags: "toc obsessivo", href: "CY-BOCS.html" }
+      ]
+    },
+    {
+      category: "Paralisia Cerebral",
+      apps: [
+        { title: "GMFCS", desc: "Classifica a gravidade do comprometimento motor grosso.", tags: "pc motor grosso", href: "GMFCS Paralisia cerebral.html" },
+        { title: "MACS", desc: "Classifica a capacidade de manipulação de objetos com as mãos.", tags: "pc maos", href: "MACS.html" },
+        { title: "CFCS", desc: "Classifica a eficácia da comunicação diária da criança.", tags: "pc comunicacao", href: "CFCS.html" },
+        { title: "EDACS", desc: "Classifica segurança e eficiência na alimentação oral.", tags: "pc alimentacao degluticao", href: "EDACS.html" },
+        { title: "HINE (Hammersmith)", desc: "Diagnóstico precoce e predição de paralisia cerebral em lactentes.", tags: "pc lactente exame", href: "Escala HINE Hammersmith.html" }
+      ]
+    },
+    {
+      category: "Linguagem e Aprendizagem",
+      apps: [
+        { title: "ABFW", desc: "Avalia fonologia, vocabulário, fluência e pragmática da linguagem.", tags: "linguagem fala", href: "ABFW.html" },
+        { title: "CCC-2", desc: "Diferencia TEA de Transtorno Específico de Linguagem.", tags: "linguagem tea", href: "CCC-2.html" }
+      ]
+    },
+    {
+      category: "Epilepsia e Neurologia Geral",
+      apps: [
+        { title: "ILAE - Crises", desc: "Padroniza a nomenclatura e o tipo de crise epiléptica observada.", tags: "epilepsia crises", href: "Classificador de Crises Epilépticas.html" },
+        { title: "YGTSS", desc: "Graduação clínica da gravidade de tiques motores e vocais.", tags: "tiques tourette", href: "Yale Global Tic Severity Scale.html" },
+        { title: "Mapeador CIF", desc: "Guia clínico para mapear funcionalidade (CIF/OMS).", tags: "funcionalidade cif", href: "Aplicativo Mapeador da CIF.html" }
+      ]
+    }
+  ];
+
+  const container = document.getElementById('categoriesContainer');
+  const searchInput = document.getElementById('searchInput');
+  const clearBtn = document.getElementById('clearSearch');
+  const emptyState = document.getElementById('emptyState');
+  const resultCount = document.getElementById('resultCount');
+
+  // Função para renderizar as categorias na tela
+  function renderHub() {
+    container.innerHTML = '';
+    scalesData.forEach((cat, catIndex) => {
+      let catDiv = document.createElement('div');
+      catDiv.className = 'category-section';
+      catDiv.id = 'cat-' + catIndex;
+      
+      let headerHTML = `<div class="category-header">
+                          <h2 class="category-title">${cat.category}</h2>
+                          <span class="category-count" id="count-${catIndex}">${cat.apps.length}</span>
+                        </div>`;
+      
+      let gridDiv = document.createElement('div');
+      gridDiv.className = 'grid';
+      gridDiv.id = 'grid-' + catIndex;
+
+      cat.apps.forEach(app => {
+        let card = document.createElement('a');
+        card.className = 'app-card';
+        card.href = app.href;
+        // Salva os dados de busca no próprio cartão para facilitar o filtro
+        card.dataset.search = (app.title + " " + app.desc + " " + app.tags).toLowerCase();
+        
+        card.innerHTML = `
+          <div class="app-title">${app.title}</div>
+          <p class="app-desc">${app.desc}</p>
+        `;
+        gridDiv.appendChild(card);
+      });
+
+      catDiv.innerHTML = headerHTML;
+      catDiv.appendChild(gridDiv);
+      container.appendChild(catDiv);
+    });
+  }
+
+  // Função de Filtro da Busca
+  function filterHub() {
+    const term = searchInput.value.toLowerCase().trim();
+    let totalVisible = 0;
+
+    // Mostrar/Ocultar botão de limpar (X)
+    clearBtn.hidden = term.length === 0;
+
+    scalesData.forEach((cat, catIndex) => {
+      const catDiv = document.getElementById('cat-' + catIndex);
+      const gridDiv = document.getElementById('grid-' + catIndex);
+      const countSpan = document.getElementById('count-' + catIndex);
+      const cards = gridDiv.getElementsByClassName('app-card');
+      
+      let visibleInCat = 0;
+
+      for (let card of cards) {
+        if (card.dataset.search.includes(term)) {
+          card.classList.remove('hidden');
+          visibleInCat++;
+          totalVisible++;
+        } else {
+          card.classList.add('hidden');
+        }
+      }
+
+      // Atualiza o contador da categoria e esconde a categoria inteira se não houver cards
+      countSpan.innerText = visibleInCat;
+      if (visibleInCat === 0) {
+        catDiv.classList.add('hidden');
+      } else {
+        catDiv.classList.remove('hidden');
+      }
+    });
+
+    // Estado Vazio e Contador Global
+    emptyState.hidden = totalVisible > 0;
+    if(term.length > 0) {
+      resultCount.innerText = totalVisible + (totalVisible === 1 ? ' escala encontrada' : ' escalas encontradas');
+    } else {
+      resultCount.innerText = '';
+    }
+  }
+
+  // Eventos
+  searchInput.addEventListener('input', filterHub);
+  clearBtn.addEventListener('click', () => {
+    searchInput.value = '';
+    filterHub();
+    searchInput.focus();
+  });
+
+  // Iniciar
+  renderHub();
+</script>
+
+</body>
+</html>
