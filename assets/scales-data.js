@@ -6,6 +6,8 @@ const SCALES_DATA = [
   {
     category: "Autismo e Neurodesenvolvimento",
     items: [
+      { title: "ABC (Aberrant Behavior Checklist)", desc: "Documentação de eficácia ou falha farmacológica e comportamental (Ouro Padrão) em TEA.", tags: "abc comportamento aberrante farmaco tea", href: "ABC - Aberrant Behavior Checklist Documentação de Eficácia ou Falha Farmacológica e Comportamental (Ouro Padrão) TEA.html" },
+{ title: "ADHD-RS-5", desc: "ADHD Rating Scale 5. Avaliação de sintomas de TDAH como alternativa ao SNAP.", tags: "tdah adhd rs 5", href: "ADHD-RS-5 (ADHD Rating Scale 5) TDAH - alternativa ao SNAP.html" },
       { title: "M-CHAT-R/F", file: "mchat-rf.html", desc: "Rastreamento de risco para Transtorno do Espectro Autista em crianças de 16 a 30 meses.", summary: "Avalia sinais precoces de risco para TEA por meio de perguntas aos pais." },
       { title: "CARS 2", file: "cars-2.html", desc: "Escala de classificação de autismo infantil, versão 2.", summary: "Avalia gravidade e características comportamentais do autismo." },
       { title: "ADOS-2", file: "ados-2.html", desc: "Protocolo de observação diagnóstica para autismo.", summary: "Observação estruturada de comunicação, interação social e comportamento." },
