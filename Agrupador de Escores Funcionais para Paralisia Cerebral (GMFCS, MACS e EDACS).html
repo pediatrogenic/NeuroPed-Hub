@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escores Funcionais Paralisia Cerebral</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; color: #333; padding: 20px; }
+        .container { max-width: 900px; background: #ffffff; margin: 0 auto; padding: 35px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h1 { color: #581c87; text-align: center; margin-bottom: 5px; font-size: 24px; }
+        p.subtitle { text-align: center; color: #475569; margin-bottom: 30px; font-size: 14px; }
+        .form-group { margin-bottom: 20px; }
+        input[type="text"] { width: 100%; padding: 11px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 15px; box-sizing: border-box; }
+        .scale-card { background: #faf5ff; border: 1px solid #e9d5ff; border-radius: 8px; padding: 20px; margin-bottom: 25px; }
+        .scale-title { font-size: 16px; font-weight: bold; color: #6b21a8; margin-bottom: 12px; border-bottom: 2px solid #e9d5ff; padding-bottom: 4px; }
+        select { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 14.5px; background: #fff; }
+        .btn-calc { display: block; width: 100%; background-color: #6b21a8; color: white; border: none; padding: 16px; font-size: 18px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .result-box { margin-top: 35px; padding: 25px; border-radius: 8px; background-color: #fdf4ff; border: 1px solid #f3e8ff; display: none; }
+        .output-text { width: 100%; height: 260px; margin-top: 15px; padding: 12px; box-sizing: border-box; font-family: monospace; font-size: 13px; border: 1px solid #cbd5e0; background-color: #ffffff; resize: vertical; }
+        footer { margin-top: 40px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 15px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Painel de Classificação Funcional na Paralisia Cerebral</h1>
+    <p class="subtitle">Escores Padronizados Multidimensionais para Laudos Neurológicos</p>
+
+    <div class="form-group">
+        <label style="font-weight:bold; display:block; margin-bottom:6px;">Identificação do Paciente:</label>
+        <input type="text" id="patientName" placeholder="Iniciais ou código">
+    </div>
+
+    <form id="pcForm">
+        <!-- GMFCS -->
+        <div class="scale-card">
+            <div class="scale-title">I. GMFCS (Gross Motor Function Classification System)</div>
+            <label for="gmfcs">Capacidade Motora Grossa / Marcha:</label>
+            <select id="gmfcs">
+                <option value="Nível I">Nível I - Anda sem limitações em ambientes internos/externos; corre e salta com limitações leves</option>
+                <option value="Nível II">Nível II - Anda com limitações em superfícies irregulares/inclinações; limitações mínimas na comunidade</option>
+                <option value="Nível III">Nível III - Anda utilizando dispositivo manual de mobilidade (andadores, bengalas); necessita de cadeira para longas distâncias</option>
+                <option value="Nível IV">Nível IV - Auto-mobilidade severamente limitada; necessita de auxílio/cadeira motorizada em ambientes comunitários</option>
+                <option value="Nível V">Nível V - Comprometimento motor severo restringe controle antigravitacional voluntário; transportado em cadeira de rodas manual</option>
+            </select>
+        </div>
+
+        <!-- MACS -->
+        <div class="scale-card">
+            <div class="scale-title">II. MACS (Manual Ability Classification System)</div>
+            <label for="macs">Manipulação de Objetos / Extremidades Superiores:</label>
+            <select id="macs">
+                <option value="Nível I">Nível I - Manipula objetos com facilidade e sucesso de forma independente</option>
+                <option value="Nível II">Nível II - Manipula a maioria dos objetos, mas com velocidade e/ou precisão discretamente reduzidas</option>
+                <option value="Nível III">Nível III - Manipula objetos com dificuldade; necessita de preparação ou adaptação do ambiente</option>
+                <option value="Nível IV">Nível IV - Manipula apenas seleção limitada de objetos fáceis em situações muito estruturadas</option>
+                <option value="Nível V">Nível V - Não manipula objetos; restrição profunda mesmo para atos motores elementares assistidos</option>
+            </select>
+        </div>
+
+        <!-- EDACS -->
+        <div class="scale-card">
+            <div class="scale-title">III. EDACS (Eating and Drinking Ability Classification System)</div>
+            <label for="edacs">Segurança Alimentar, Mastigação e Deglutição:</label>
+            <select id="edacs">
+                <option value="Nível I">Nível I - Come e bebe de forma eficiente e segura em todas as consistências padrão</option>
+                <option value="Nível II">Nível II - Come e bebe com segurança, mas com alguma lentidão ou perda discreta de alimento pela comissura</option>
+                <option value="Nível III">Nível III - Come e bebe com limitações na eficiência; risco moderado de engasgo/aspiração crônica</option>
+                <option value="Nível IV">Nível IV - Limitações severas na segurança; alto risco aspirativo necessitando de consistências muito modificadas</option>
+                <option value="Nível V">Nível V - Incapaz de se alimentar por via oral com segurança; indicação estrita de via alternativa (GTT/SNE)</option>
+            </select>
+        </div>
+
+        <button type="button" class="btn-calc" onclick="calcularPC()">Gerar Sumário Funcional</button>
+    </form>
+
+    <div id="resultBox" class="result-box">
+        <h3 style="margin-top:0; color:#581c87;">Escores Compilados para Emissão de Laudo</h3>
+        <textarea id="outputText" class="output-text" readonly></textarea>
+        <button style="background-color:#4b5563; color:white; border:none; padding:10px 20px; cursor:pointer; border-radius:6px; font-weight:bold;" onclick="navigator.clipboard.writeText(document.getElementById('outputText').value); alert('Copiado!')">Copiar Bloco Funcional</button>
+    </div>
+    <footer>Desenvolvido por Giovani Petró</footer>
+</div>
+<script>
+    function calcularPC() {
+        const nome = document.getElementById('patientName').value || "Não identificado";
+        const g = document.getElementById('gmfcs').value;
+        const m = document.getElementById('macs').value;
+        const e = document.getElementById('edacs').value;
+
+        let txt = `SUMÁRIO DE PERFIL FUNCIONAL – PARALISIA CEREBRAL (PC)\nDesenvolvido por: Giovani Petró\n`;
+        txt += `Paciente: ${nome} | Data: ${new Date().toLocaleDateString('pt-BR')}\n`;
+        txt += `======================================================================\n`;
+        txt += `MENSURAÇÃO MULTIDIMENSIONAL DO DESEMPENHO:\n\n`;
+        txt += `• Mobilidade Grossa (GMFCS): ........ ${g}\n`;
+        txt += `• Destreza/Habilidade Manual (MACS): . ${m}\n`;
+        txt += `• Segurança Alimentar (EDACS): ...... ${e}\n`;
+        txt += `======================================================================\n`;
+        txt += `Conclusão Neurológica: O enquadramento funcional acima descreve de forma\n`;
+        txt += `padronizada internacional o status adaptativo atual do paciente, servindo como\n`;
+        txt += `critério objetivo para o dimensionamento de terapias integradas necessárias.\n`;
+        txt += `======================================================================\n`;
+
+        document.getElementById('outputText').value = txt;
+        document.getElementById('resultBox').style.display = "block";
+    }
+</script>
+</body>
+</html>

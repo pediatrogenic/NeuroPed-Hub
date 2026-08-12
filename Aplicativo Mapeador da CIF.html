@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapeador Clínico CIF - Neuropediatria</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 950px;
+            background: #ffffff;
+            margin: 0 auto;
+            padding: 35px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        h1 {
+            color: #0d9488;
+            text-align: center;
+            margin-bottom: 5px;
+            font-size: 24px;
+        }
+        p.subtitle {
+            text-align: center;
+            color: #4b5563;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .info-box {
+            background-color: #f0fdfa;
+            border-left: 4px solid #0d9488;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 25px;
+            font-size: 13.5px;
+            line-height: 1.5;
+            color: #115e59;
+        }
+        .patient-info {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        label.field-label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 6px;
+            color: #374151;
+            font-size: 14px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+        .section-header {
+            background-color: #ccfbf1;
+            color: #115e59;
+            padding: 8px 12px;
+            font-weight: bold;
+            font-size: 14px;
+            border-radius: 4px;
+            margin: 25px 0 15px 0;
+            text-transform: uppercase;
+        }
+        .item-row {
+            padding: 18px 12px;
+            border-bottom: 1px solid #f3f4f6;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .item-text {
+            font-size: 15px;
+            font-weight: bold;
+            color: #1e293b;
+        }
+        .item-help {
+            font-size: 13px;
+            color: #64748b;
+            line-height: 1.4;
+            margin-top: 2px;
+            background-color: #f8fafc;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border-left: 3px solid #cbd5e1;
+        }
+        .options-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 6px;
+        }
+        .options-group label {
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 600;
+            background: #f3f4f6;
+            padding: 8px 10px;
+            border-radius: 4px;
+            border: 1px solid #e5e7eb;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .options-group label:hover {
+            background: #e5e7eb;
+        }
+        .btn-calc {
+            display: block;
+            width: 100%;
+            background-color: #0d9488;
+            color: white;
+            border: none;
+            padding: 16px;
+            font-size: 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 35px;
+            font-weight: bold;
+        }
+        .btn-calc:hover {
+            background-color: #0f766e;
+        }
+        .result-box {
+            margin-top: 35px;
+            padding: 25px;
+            border-radius: 8px;
+            background-color: #f0fdfa;
+            border: 1px solid #b9f6f0;
+            display: none;
+        }
+        .output-text {
+            width: 100%;
+            height: 380px;
+            margin-top: 15px;
+            padding: 12px;
+            box-sizing: border-box;
+            font-family: monospace;
+            font-size: 13px;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            background-color: #ffffff;
+            resize: vertical;
+            line-height: 1.4;
+        }
+        .btn-copy {
+            background-color: #4b5563;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 12px;
+            color: #9ca3af;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Mapeador de Funcionalidade e Incapacidade (CIF)</h1>
+    <p class="subtitle">Guia Clínico Explicado voltado à Neurologia Infantil — OMS</p>
+
+    <div class="info-box">
+        <strong>Régua de Gravidade (Como pontuar cada item baseado na CIF):</strong><br>
+        • <strong>0 - Nenhuma dificuldade:</strong> O comportamento ou estrutura é típico para a idade da criança (0-4% de impacto).<br>
+        • <strong>1 - Leve:</strong> Pequena alteração. A criança faz a tarefa, mas com esforço extra ou lentidão (5-24%).<br>
+        • <strong>2 - Moderada:</strong> Dificuldade nítida. O impacto é evidente e atrapalha o fluxo normal do dia a dia (25-49%).<br>
+        • <strong>3 - Grave:</strong> Barreiras severas. A criança falha muito na execução ou depende de apoio constante de terceiros (50-95%).<br>
+        • <strong>4 - Completa:</strong> Incapacidade total ou ausência absoluta da função/estrutura biológica (96-100%).
+    </div>
+
+    <div class="patient-info">
+        <div>
+            <label class="field-label" for="patientName">Identificação do Paciente:</label>
+            <input type="text" id="patientName" placeholder="Ex: Iniciais do paciente">
+        </div>
+        <div>
+            <label class="field-label" for="diagnosis">Diagnóstico de Base:</label>
+            <input type="text" id="diagnosis" placeholder="Ex: TEA, Paralisia Cerebral Espástica, TDAH">
+        </div>
+    </div>
+
+    <form id="cifForm">
+        <div class="section-header">Pilar 1: Funções e Estruturas do Corpo (O Componente Biológico)</div>
+        <div id="secFuncoes"></div>
+
+        <div class="section-header">Pilar 2: Atividade (A Capacidade Individual da Criança)</div>
+        <div id="secAtividades"></div>
+
+        <div class="section-header">Pilar 3: Participação (O Envolvimento Social Real)</div>
+        <div id="secParticipacao"></div>
+
+        <div class="section-header">Pilar 4: Fatores Ambientais (O Contexto Externo)</div>
+        <div id="secAmbientais"></div>
+
+        <button type="button" class="btn-calc" onclick="calcularCIF()">Gerar Laudo Estruturado CIF</button>
+    </form>
+
+    <div id="resultBox" class="result-box">
+        <h3 style="margin-top: 0; color: #0f766e; font-size: 18px; border-bottom: 1px solid #b9f6f0; padding-bottom: 8px;">Laudo Biopsicossocial Sincronizado</h3>
+        <textarea id="outputText" class="output-text" readonly></textarea>
+        <button class="btn-copy" onclick="copiarTexto()">Copiar para Área de Transferência</button>
+    </div>
+
+    <footer>
+        Desenvolvido por Giovani Petró
+    </footer>
+</div>
+
+<script>
+    const itensCIF = [
+        // Funções do Corpo
+        { 
+            id: 1, cat: "fun", 
+            text: "Funções Mentais Globais e Específicas", 
+            help: "<strong>O que avaliar:</strong> Cognição geral, inteligência, nível de atenção/concentração e autorregulação emocional.<br>• <em>Exemplo Clínico:</em> Em crianças com TDAH ou TEA, avalie o impacto do déficit de atenção ou da desregulação/crises de birra no funcionamento cerebral basal." 
+        },
+        { 
+            id: 2, cat: "fun", 
+            text: "Funções da Linguagem", 
+            help: "<strong>O que avaliar:</strong> Mecanismos cerebrais de recepção (entender) e expressão (falar) de sons, símbolos e frases.<br>• <em>Exemplo Clínico:</em> Atrasos de fala precoces, mutismo no TEA ou distorções fonéticas severas entram como prejuízo biológico aqui." 
+        },
+        { 
+            id: 3, cat: "fun", 
+            text: "Funções Neuromusculares e Relacionadas ao Movimento", 
+            help: "<strong>O que avaliar:</strong> Tônus muscular (espasticidade/hipotonia), força nos membros, reflexos e coordenação motora (praxia).<br>• <em>Exemplo Clínico:</em> Em pacientes com Paralisia Cerebral, a espasticidade que limita a amplitude articular pontua como prejuízo moderado a grave." 
+        },
+        
+        // Atividade
+        { 
+            id: 4, cat: "ati", text: "Mobilidade (Execução Física)", 
+            help: "<strong>O que avaliar:</strong> A capacidade física individual da criança para executar ações como caminhar, mudar de postura (sentar/levantar) ou segurar objetos.<br>• <em>Exemplo Clínico:</em> Avalie o nível de dificuldade física real (independente de ter rodas ou andador) para se locomover entre os cômodos." 
+        },
+        { 
+            id: 5, cat: "ati", text: "Autocuidado Básico", 
+            help: "<strong>O que avaliar:</strong> Autonomia para realizar as atividades de vida diária básicas esperadas para a idade (comer com talheres, lavar as mãos, despir-se/vestir-se, controle de esfíncteres).<br>• <em>Exemplo Clínico:</em> Se uma criança de 6 anos ainda depende totalmente da mãe para se vestir e higienizar, o qualificador de dificuldade será alto." 
+        },
+        { 
+            id: 6, cat: "ati", text: "Comunicação (Aplicação Prática)", 
+            help: "<strong>O que avaliar:</strong> Como a criança gerencia a fala na prática para trocar informações cotidianas, expressar desejos específicos ou pedir ajuda.<br>• <em>Exemplo Clínico:</em> Crianças com CAA (Comunicação Alternativa) podem ter prejuízo na função da fala, mas boa capacidade de atividade na comunicação pelo tablet." 
+        },
+        
+        // Participação
+        { 
+            id: 7, cat: "par", text: "Vida Escolar e Aprendizagem", 
+            help: "<strong>O que avaliar:</strong> O nível de engajamento e as restrições que a criança sofre dentro do ambiente escolar real (se ela consegue acompanhar a turma, interagir no recreio ou se fica isolada).<br>• <em>Exemplo Clínico:</em> Restrições severas de permanência em sala devido a comportamentos disruptivos ou falta de adaptação curricular curricular." 
+        },
+        { 
+            id: 8, cat: "par", text: "Relacionamentos Interpessoais", 
+            help: "<strong>O que avaliar:</strong> O envolvimento social da criança com outras pessoas (familiares, professores e, principalmente, brincar JUNTO com pares da mesma idade).<br>• <em>Exemplo Clínico:</em> O isolamento intenso ou a incapacidade de manter brincadeiras recíprocas no TEA geram restrição moderada/grave de participação." 
+        },
+        { 
+            id: 9, cat: "par", text: "Vida Comunitária, Social e Lazer", 
+            help: "<strong>O que avaliar:</strong> Restrições da família e da criança para frequentar ambientes sociais abertos (ir a parquinhos, festas de aniversário, shoppings ou restaurantes).<br>• <em>Exemplo Clínico:</em> Famílias que deixam de sair de casa porque a criança entra em crise sensorial ou desorganização motora grave nesses locais." 
+        },
+        
+        // Fatores Ambientais
+        { 
+            id: 10, cat: "amb", text: "Apoio Familiar e Cuidadores", 
+            help: "<strong>O que avaliar:</strong> Se as pessoas próximas funcionam como um motor que ajuda ou uma barreira. Família engajada nas terapias e orientações médica é facilitador.<br>• <em>Pontuação:</em> Se a família executa perfeitamente as condutas em casa, marque como um 'Facilitador'." 
+        },
+        { 
+            id: 11, cat: "amb", text: "Serviços, Sistemas e Políticas de Saúde/Educação", 
+            help: "<strong>O que avaliar:</strong> O acesso externo que o paciente tem à estrutura da cidade (vagas na rede de reabilitação, plano de saúde liberando terapias, escola aceitando monitor).<br>• <em>Pontuação:</em> A falta de terapeutas na cidade ou recusa de suporte escolar entra estritamente como uma 'Barreira'." 
+        }
+    ];
+
+    function renderizarForm() {
+        itensCIF.forEach(p => {
+            let targetId = "";
+            if(p.cat === "fun") targetId = "secFuncoes";
+            else if(p.cat === "ati") targetId = "secAtividades";
+            else if(p.cat === "par") targetId = "secParticipacao";
+            else if(p.cat === "amb") targetId = "secAmbientais";
+            
+            const targetDiv = document.getElementById(targetId);
+            const row = document.createElement('div');
+            row.className = 'item-row';
+            
+            let labelsText = p.cat === "amb" 
+                ? `
+                    <label><input type="radio" name="cif${p.id}" value="Facilitador Completo (+4)" required> +4 Facilitador Completo</label>
+                    <label><input type="radio" name="cif${p.id}" value="Facilitador Leve (+1)"> +1 Facilitador Leve</label>
+                    <label><input type="radio" name="cif${p.id}" value="Neutro (0)"> 0 Neutro</label>
+                    <label><input type="radio" name="cif${p.id}" value="Barreira Leve (.1)"> .1 Barreira Leve</label>
+                    <label><input type="radio" name="cif${p.id}" value="Barreira Grave (.3)"> .3 Barreira Grave</label>
+                  `
+                : `
+                    <label><input type="radio" name="cif${p.id}" value="0 - Nenhuma" required> 0 - Nenhuma</label>
+                    <label><input type="radio" name="cif${p.id}" value="1 - Leve"> 1 - Leve</label>
+                    <label><input type="radio" name="cif${p.id}" value="2 - Moderada"> 2 - Moderada</label>
+                    <label><input type="radio" name="cif${p.id}" value="3 - Grave"> 3 - Grave</label>
+                    <label><input type="radio" name="cif${p.id}" value="4 - Completa"> 4 - Completa</label>
+                  `;
+
+            row.innerHTML = `
+                <div>
+                    <div class="item-text">${p.text}</div>
+                    <div class="item-help">${p.help}</div>
+                </div>
+                <div class="options-group">${labelsText}</div>
+            `;
+            targetDiv.appendChild(row);
+        });
+    }
+
+    function calcularCIF() {
+        let ok = true;
+        let laudoTexto = [];
+
+        itensCIF.forEach(p => {
+            const radio = document.querySelector(`input[name="cif${p.id}"]:checked`);
+            if (!radio) { ok = false; return; }
+            laudoTexto.push(`• ${p.text}: Enquadramento = [${radio.value}]`);
+        });
+
+        if (!ok) {
+            alert("Por favor, preencha todos os domínios para gerar o laudo unificado da CIF.");
+            return;
+        }
+
+        const nome = document.getElementById('patientName').value || "Não identificado";
+        const diag = document.getElementById('diagnosis').value || "Não informado";
+
+        let dataAtual = new Date().toLocaleDateString('pt-BR');
+        let txt = `AVALIAÇÃO BIOPSICOSSOCIAL DE FUNCIONALIDADE – DIRETRIZES CIF (OMS)\n`;
+        txt += `Data de Emissão: ${dataAtual}\n`;
+        txt += `Paciente/ID: ${nome} | Diagnóstico de Base: ${diag}\n`;
+        txt += `======================================================================\n`;
+        txt += `MAPEAMENTO DOS QUALIFICADORES DA FUNCIONALIDADE:\n\n`;
+        
+        laudoTexto.forEach((linha, index) => {
+            if(index === 0) txt += `[FUNÇÕES E ESTRUTURAS DO CORPO]\n`;
+            if(index === 3) txt += `\n[ATIVIDADES DIÁRIAS / CAPACIDADE INDIVIDUAL]\n`;
+            if(index === 6) txt += `\n[PARTICIPAÇÃO SOCIAL / RESTRITIVIDADE NO MEIO]\n`;
+            if(index === 9) txt += `\n[CONTEXTO AMBIENTAL EXTERNO]\n`;
+            txt += `${linha}\n`;
+        });
+        
+        txt += `======================================================================\n`;
+        txt += `PARECER NEUROPEDIÁTRICO CONTEXTUALIZADO:\n`;
+        txt += `O mapeamento acima traduz a perda funcional e anatômica correlacionada\n`;
+        txt += `aos limites de independência em tarefas e restrições de participação social.\n`;
+        txt += `Os fatores ambientais foram ponderados como barreiras ou facilitadores\n`;
+        txt += `para o pleno desenvolvimento e inclusão do paciente.\n`;
+        txt += `======================================================================\n`;
+
+        document.getElementById('outputText').value = txt;
+        document.getElementById('resultBox').style.display = "block";
+        document.getElementById('resultBox').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function copiarTexto() {
+        const textElement = document.getElementById('outputText');
+        textElement.select();
+        navigator.clipboard.writeText(textElement.value);
+        alert("Laudo biopsicossocial baseado na CIF copiado!");
+    }
+
+    window.onload = renderizarForm;
+</script>
+
+</body>
+</html>

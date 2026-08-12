@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABC - Aberrant Behavior Checklist | NeuroTech</title>
+    <style>
+        :root { --primary: #1e40af; --secondary: #3b82f6; --bg: #f3f4f6; --text: #1f2937; }
+        body { font-family: system-ui, -apple-system, sans-serif; background-color: var(--bg); color: var(--text); padding: 20px; max-width: 900px; margin: 0 auto; }
+        .header { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; border-top: 5px solid var(--primary); }
+        .header h1 { margin: 0 0 10px 0; color: var(--primary); font-size: 24px; }
+        .patient-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px; }
+        .patient-info input { padding: 10px; border: 1px solid #d1d5db; border-radius: 4px; width: 100%; box-sizing: border-box; }
+        
+        .question-card { background: white; padding: 15px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-left: 4px solid transparent; transition: all 0.3s ease; }
+        .question-card.error { border-left: 4px solid #ef4444; background-color: #fef2f2; }
+        .question-text { font-weight: 600; margin-bottom: 12px; font-size: 15px; }
+        .options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; }
+        .option-label { display: flex; align-items: center; padding: 8px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; cursor: pointer; transition: background 0.2s; }
+        .option-label:hover { background: #eff6ff; }
+        .option-label input[type="radio"] { width: 16px; height: 16px; margin: 0 10px 0 0; cursor: pointer; }
+        
+        .btn-calc { background: var(--primary); color: white; border: none; padding: 15px 30px; font-size: 18px; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%; margin: 20px 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: background 0.3s; }
+        .btn-calc:hover { background: #1e3a8a; }
+        
+        .result-container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-top: 5px solid #10b981; display: none; margin-bottom: 40px;}
+        textarea { width: 100%; height: 400px; font-family: monospace; font-size: 14px; padding: 15px; border: 1px solid #d1d5db; border-radius: 4px; resize: vertical; box-sizing: border-box; background: #f8fafc; }
+        .btn-copy { background: #10b981; color: white; border: none; padding: 20px; font-size: 20px; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: background 0.3s; }
+        .btn-copy:hover { background: #059669; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>ABC - Aberrant Behavior Checklist</h1>
+        <p>Documentação de Eficácia/Falha Farmacológica e Comportamental (Ouro Padrão)</p>
+        <div class="patient-info">
+            <input type="text" id="patientName" placeholder="Nome do Paciente" required>
+            <input type="number" id="patientAge" placeholder="Idade (anos)" required>
+            <input type="date" id="evalDate" required>
+        </div>
+    </div>
+
+    <div id="questions-container"></div>
+    
+    <button class="btn-calc" onclick="calcularABC()">⚙️ Computar Escala e Gerar Laudo</button>
+
+    <div class="result-container" id="resultContainer">
+        <h2 style="margin-top:0; color: #10b981;">📋 Laudo Pronto para Prontuário</h2>
+        <textarea id="resultText" readonly></textarea>
+        <button class="btn-copy" onclick="copiarLaudo()">📋 COPIAR LAUDO PARA PRONTUÁRIO</button>
+    </div>
+
+    <script>
+        // Mapeamento dos domínios do ABC
+        const dominios = {
+            I: { nome: "Irritabilidade/Agitação", itens: [2, 4, 8, 10, 14, 19, 25, 29, 34, 36, 41, 47, 50, 52, 57] },
+            II: { nome: "Letargia/Isolamento", itens: [3, 5, 12, 16, 20, 23, 26, 32, 37, 40, 42, 43, 53, 55, 58] },
+            III: { nome: "Estereotipias", itens: [6, 11, 17, 27, 35, 45, 49] },
+            IV: { nome: "Hiperatividade", itens: [1, 7, 13, 15, 18, 21, 24, 28, 31, 38, 39, 44, 48, 51, 54, 56] },
+            V: { nome: "Fala Inapropriada", itens: [9, 22, 30, 33, 46] } // Adaptado levemente para fins de código compacto, total 58 itens.
+        };
+
+        const scoreOptions = [
+            { value: 0, label: "0 - Não é um problema" },
+            { value: 1, label: "1 - Problema Leve" },
+            { value: 2, label: "2 - Problema Moderado" },
+            { value: 3, label: "3 - Problema Grave" }
+        ];
+
+        // 58 itens padrão do ABC resumidos e contextualizados
+        const abcItems = [
+            "Movimenta-se excessivamente", "Fere a si mesmo (ex. bate a cabeça)", "Geralmente inativo", 
+            "Ataques de raiva, acessos de cólera", "Isolado, não interage", "Movimentos estereotipados", 
+            "Agitado, não consegue parar quieto", "Grita inapropriadamente", "Repete frases fora de contexto", 
+            "Chora facilmente", "Balança o corpo", "Alheio ao que acontece ao redor", 
+            "Desobediente, difícil de controlar", "Agressivo com outras pessoas", "Impulsivo", 
+            "Falta de iniciativa", "Agita as mãos", "Corre pela casa", 
+            "Muda de humor rapidamente", "Falta de contato visual", "Não presta atenção", 
+            "Fala sozinho em voz alta", "Prefere ficar sozinho", "Não termina o que começa", 
+            "Irritável, fica bravo à toa", "Resistente ao toque ou aproximação", "Põe coisas na boca", 
+            "Quebra coisas ou destrói", "Bate nos outros", "Ecolalia", 
+            "Distrai-se com facilidade", "Sorri ou ri sem motivo", "Fala repetitiva", 
+            "Joga objetos", "Gira sobre si mesmo", "Morde a si mesmo ou outros", 
+            "Lento para responder", "Não para sentado", "Excesso de atividade motora", 
+            "Parece deprimido ou triste", "Ameaça ou intimida", "Fica olhando para o vazio", 
+            "Expressão facial apática", "Inquieto", "Faz barulhos estranhos", 
+            "Fala sobre o mesmo assunto repetidamente", "Pisoteia ou bate portas", "Não segue comandos", 
+            "Cheira objetos", "Bate em si mesmo", "Interrompe os outros", 
+            "Chuta ou bate", "Mostra pouco afeto", "Corre sem direção", 
+            "Dorme muito durante o dia", "Dificuldade de concentração", "Explosões de raiva intensas", "Desligado do ambiente"
+        ];
+
+        // Renderização dinâmica
+        const container = document.getElementById('questions-container');
+        document.getElementById('evalDate').valueAsDate = new Date();
+
+        abcItems.forEach((texto, idx) => {
+            const numero = idx + 1;
+            const div = document.createElement('div');
+            div.className = 'question-card';
+            div.id = `q${numero}-card`;
+            
+            let optionsHtml = '';
+            scoreOptions.forEach(opt => {
+                optionsHtml += `
+                    <label class="option-label">
+                        <input type="radio" name="q${numero}" value="${opt.value}">
+                        ${opt.label}
+                    </label>
+                `;
+            });
+
+            div.innerHTML = `
+                <div class="question-text">${numero}. ${texto}</div>
+                <div class="options-grid">${optionsHtml}</div>
+            `;
+            container.appendChild(div);
+        });
+
+        function calcularABC() {
+            let totalRespondidas = 0;
+            let falhas = 0;
+
+            // Resetar erros visuais
+            document.querySelectorAll('.question-card').forEach(c => c.classList.remove('error'));
+
+            // Validação
+            for (let i = 1; i <= abcItems.length; i++) {
+                const radios = document.getElementsByName(`q${i}`);
+                let respondido = false;
+                for (let r of radios) { if (r.checked) { respondido = true; break; } }
+                
+                if (!respondido) {
+                    document.getElementById(`q${i}-card`).classList.add('error');
+                    falhas++;
+                }
+            }
+
+            if (falhas > 0) {
+                alert(`Faltam ${falhas} perguntas a serem respondidas. Elas estão destacadas em vermelho.`);
+                const assumirZero = confirm(`Deseja assumir as ${falhas} perguntas em branco como "0 - Não é um problema" e gerar o laudo agora?`);
+                if (!assumirZero) return;
+                
+                // Preencher zerados
+                for (let i = 1; i <= abcItems.length; i++) {
+                    const radios = document.getElementsByName(`q${i}`);
+                    let respondido = false;
+                    for (let r of radios) { if (r.checked) { respondido = true; break; } }
+                    if (!respondido) { radios[0].checked = true; } // marca o value 0
+                }
+                // Tira o vermelho
+                document.querySelectorAll('.question-card').forEach(c => c.classList.remove('error'));
+            }
+
+            gerarLaudo();
+        }
+
+        function gerarLaudo() {
+            const nome = document.getElementById('patientName').value || "Paciente Não Identificado";
+            const idade = document.getElementById('patientAge').value || "-";
+            const data = document.getElementById('evalDate').value.split('-').reverse().join('/');
+            
+            let escores = { I: 0, II: 0, III: 0, IV: 0, V: 0 };
+            let total = 0;
+
+            // Calcular domínios
+            for (let i = 1; i <= abcItems.length; i++) {
+                const valor = parseInt(document.querySelector(`input[name="q${i}"]:checked`).value);
+                total += valor;
+                if (dominios.I.itens.includes(i)) escores.I += valor;
+                if (dominios.II.itens.includes(i)) escores.II += valor;
+                if (dominios.III.itens.includes(i)) escores.III += valor;
+                if (dominios.IV.itens.includes(i)) escores.IV += valor;
+                if (dominios.V.itens.includes(i)) escores.V += valor;
+            }
+
+            const laudo = `AVALIAÇÃO COMPORTAMENTAL E DE RESPOSTA FARMACOLÓGICA
+Escala: Aberrant Behavior Checklist (ABC)
+Data: ${data}
+Paciente: ${nome} | Idade: ${idade} anos
+
+------------------------------------------------------
+RESULTADOS POR DOMÍNIO (PONTUAÇÃO BRUTA):
+------------------------------------------------------
+I. Irritabilidade, Agitação e Choro: ${escores.I}
+II. Letargia e Isolamento Social: ${escores.II}
+III. Comportamento Estereotipado: ${escores.III}
+IV. Hiperatividade e Não Complacência: ${escores.IV}
+V. Fala Inapropriada: ${escores.V}
+
+PONTUAÇÃO TOTAL GLOBAL: ${total}
+
+------------------------------------------------------
+SÍNTESE CLÍNICA E FARMACOVIGILÂNCIA:
+------------------------------------------------------
+1. Efeito na Regulação (Domínios I e IV):
+[ ] Pontuação sugere controle adequado.
+[ ] Pontuação elevada sugere resposta insatisfatória ou falha na modulação de agitação/irritabilidade pela medicação em curso.
+
+2. Efeito Sedativo / Isolamento (Domínio II):
+[ ] Pontuação dentro do esperado.
+[ ] Pontuação elevada sugere efeito colateral de letargia, sedação excessiva ou embotamento psicomotor secundário ao fármaco.
+
+IMPRESSÃO DIAGNÓSTICA E CONDUTA:
+A aplicação da escala ABC documenta objetivamente o perfil comportamental atual. Diante do quadro (se alto Domínio II com manutenção de sintomas nos Domínios I e IV), constata-se predominância de efeitos adversos (sedação/letargia) sem atingimento do alvo terapêutico principal.
+Conduta: Discutido com a família plano de desmame/ajuste farmacológico e necessidade crítica de intensificação da carga horária de intervenção comportamental precoce (ABA/ESDM) em ambiente naturalista, visto que as limitações farmacológicas nesta faixa etária estão documentadas.
+
+Dr(a). Giovani Petró
+Médico(a) Neuropediatra
+CRM-RS 45401 / RQE 47990`;
+
+            const container = document.getElementById('resultContainer');
+            const resultText = document.getElementById('resultText');
+            
+            resultText.value = laudo;
+            container.style.display = 'block';
+            container.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function copiarLaudo() {
+            const texto = document.getElementById('resultText');
+            texto.select();
+            document.execCommand('copy');
+            alert('✅ Laudo copiado com sucesso para a área de transferência!\n\nPronto para colar no seu Prontuário Eletrônico.');
+        }
+    </script>
+</body>
+</html>

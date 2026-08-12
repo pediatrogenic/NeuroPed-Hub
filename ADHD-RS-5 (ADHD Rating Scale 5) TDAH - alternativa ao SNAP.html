@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADHD-RS-5 - Avaliação TDAH</title>
+    <style>
+        :root { --p: #0f766e; --s: #14b8a6; --bg: #f0fdfa; --b: #99f6e4; --t: #0f172a; }
+        body { font-family: 'Segoe UI', Tahoma, Verdana, sans-serif; background: #f8fafc; color: var(--t); margin: 0; padding: 20px; }
+        .container { max-width: 950px; background: #fff; margin: 0 auto; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h1 { color: var(--p); text-align: center; margin-bottom: 5px; }
+        p.subtitle { text-align: center; color: var(--s); margin-bottom: 25px; font-size: 15px; font-weight: 500; }
+        .info-panel { background-color: var(--bg); border-left: 5px solid var(--p); padding: 15px; border-radius: 6px; margin-bottom: 25px; font-size: 13.5px; color: #115e59; line-height: 1.5; }
+        .pt-info { display: flex; gap: 15px; margin-bottom: 20px; }
+        .pt-info input { flex: 1; padding: 10px; border: 1px solid var(--b); border-radius: 6px; font-size: 14px; }
+        .domain-header { background: var(--p); color: white; padding: 12px 15px; font-weight: bold; border-radius: 6px; margin: 25px 0 10px; text-transform: uppercase; font-size: 14px; }
+        .item-row { padding: 12px 10px; border-bottom: 1px solid #f1f5f9; display: flex; flex-direction: column; gap: 8px; }
+        @media (min-width: 768px) { .item-row { flex-direction: row; justify-content: space-between; align-items: center; } }
+        .item-text { flex: 1; font-size: 14px; font-weight: 500; color: #334155;}
+        .opts { display: flex; gap: 4px; }
+        .opts label { cursor: pointer; font-size: 11px; font-weight: bold; background: #f1f5f9; padding: 8px 10px; border-radius: 4px; border: 1px solid #cbd5e1; flex: 1; text-align: center; white-space: nowrap; transition: 0.2s;}
+        .opts label:hover { background: #e2e8f0; }
+        .btn-calc { width: 100%; background: var(--p); color: white; padding: 16px; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 30px; transition: 0.2s;}
+        .btn-calc:hover { background: #0f766e; }
+        .res-box { margin-top: 35px; padding: 25px; border-radius: 8px; display: none; background: var(--bg); border: 2px solid var(--b); }
+        
+        /* CORREÇÃO DO TAMANHO DA CAIXA AQUI */
+        .output-text { width: 100%; height: 400px; margin-top: 15px; padding: 15px; font-family: monospace; font-size: 13.5px; background: #fff; border: 1px solid #cbd5e0; border-radius: 6px; resize: vertical; line-height: 1.5; box-sizing: border-box;}
+        
+        footer { margin-top: 30px; text-align: center; font-size: 12px; color: #64748b; border-top: 1px solid #e2e8f0; padding-top: 15px;}
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>ADHD Rating Scale 5 (ADHD-RS-5)</h1>
+    <p class="subtitle">Avaliação Diagnóstica de TDAH Baseada no DSM-5 (5-17 anos)</p>
+    <div class="info-panel">
+        <strong>Instruções:</strong> Avalie a frequência de cada comportamento nos últimos 6 meses. O sistema pontua automaticamente a gravidade (0 a 3) e contabiliza os sintomas clinicamente significativos (pontuação ≥ 2: Frequentemente / Muito Frequentemente).
+    </div>
+    <div class="pt-info">
+        <input type="text" id="ptName" placeholder="Nome do Paciente">
+        <input type="text" id="ptAge" placeholder="Idade Atual">
+        <input type="text" id="informant" placeholder="Informante (ex: Mãe/Professor)">
+    </div>
+    <form id="formADHD">
+        <div id="adhdCont"></div>
+        <button type="button" class="btn-calc" onclick="calcADHD()">Gerar Relatório TDAH (ADHD-RS-5)</button>
+    </form>
+    <div id="resBox" class="res-box">
+        <h3 style="margin-top:0; color:var(--p);">Perfil Sintomatológico</h3>
+        <textarea id="output" class="output-text" readonly></textarea>
+        <button onclick="document.getElementById('output').select(); navigator.clipboard.writeText(document.getElementById('output').value); alert('Laudo copiado!');" style="background:var(--p); color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer; font-weight:bold; margin-top:10px;">Copiar Laudo</button>
+    </div>
+    <footer>Desenvolvido por Dr. Giovani Anton Petró (CRM-RS 45401) | Ref: DuPaul et al. ADHD Rating Scale-5.</footer>
+</div>
+
+<script>
+    const dbADHD = [
+        { d: "Desatenção", q: [
+            "1. Falha em prestar atenção a detalhes ou comete erros por descuido.",
+            "2. Tem dificuldade em manter a atenção em tarefas ou atividades de lazer.",
+            "3. Parece não escutar quando se fala diretamente com ele(a).",
+            "4. Não segue instruções até ao fim e não termina deveres ou tarefas.",
+            "5. Tem dificuldade em organizar tarefas e atividades.",
+            "6. Evita, não gosta ou reluta em envolver-se em tarefas que exijam esforço mental prolongado.",
+            "7. Perde coisas necessárias para as tarefas ou atividades.",
+            "8. Distrai-se facilmente com estímulos externos.",
+            "9. É esquecido(a) nas atividades do dia a dia."
+        ]},
+        { d: "Hiperatividade e Impulsividade", q: [
+            "10. Remexe ou batuca com as mãos ou pés, ou contorce-se na cadeira.",
+            "11. Levanta-se do lugar em situações em que se espera que permaneça sentado(a).",
+            "12. Corre ou sobe em coisas em situações onde isso é inapropriado.",
+            "13. Tem dificuldade em brincar ou envolver-se em atividades de lazer de forma calma.",
+            "14. Está sempre em movimento ou age como se estivesse 'ligado a um motor'.",
+            "15. Fala excessivamente.",
+            "16. Responde precipitadamente antes de a pergunta ter sido terminada.",
+            "17. Tem dificuldade em esperar pela sua vez.",
+            "18. Interrompe ou intromete-se nas conversas ou atividades dos outros."
+        ]}
+    ];
+
+    const cont = document.getElementById('adhdCont');
+    dbADHD.forEach((dom, dIdx) => {
+        cont.innerHTML += `<div class="domain-header">${dom.d}</div>`;
+        dom.q.forEach((quest, qIdx) => {
+            let id = dIdx * 9 + qIdx;
+            cont.innerHTML += `
+            <div class="item-row">
+                <div class="item-text">${quest}</div>
+                <div class="opts">
+                    <label><input type="radio" name="q_${id}" value="0"> 0 (Nunca/Raramente)</label>
+                    <label><input type="radio" name="q_${id}" value="1"> 1 (Às vezes)</label>
+                    <label><input type="radio" name="q_${id}" value="2"> 2 (Frequentemente)</label>
+                    <label><input type="radio" name="q_${id}" value="3"> 3 (Muito Freq.)</label>
+                </div>
+            </div>`;
+        });
+    });
+
+    function calcADHD() {
+        let scInat = 0, scHip = 0, symInat = 0, symHip = 0, ok = true;
+        for(let i=0; i<18; i++) {
+            let r = document.querySelector(`input[name="q_${i}"]:checked`);
+            if(!r) { ok = false; break; }
+            let val = parseInt(r.value);
+            if(i < 9) { scInat += val; if(val >= 2) symInat++; } 
+            else { scHip += val; if(val >= 2) symHip++; }
+        }
+
+        if(!ok) { alert("Responda a todos os 18 itens."); return; }
+
+        let diag = "";
+        if (symInat >= 6 && symHip >= 6) diag = "Apresentação Combinada";
+        else if (symInat >= 6) diag = "Apresentação Predominantemente Desatenta";
+        else if (symHip >= 6) diag = "Apresentação Predominantemente Hiperativa/Impulsiva";
+        else diag = "Sintomas abaixo do limiar clínico para diagnóstico primário";
+
+        let txt = `ESCALA DE AVALIAÇÃO DE TDAH (ADHD-RS-5)\nPaciente: ${document.getElementById('ptName').value || '-'} | Idade: ${document.getElementById('ptAge').value || '-'}\nInformante: ${document.getElementById('informant').value || '-'}\nData: ${new Date().toLocaleDateString('pt-PT')}\nMédico: Dr. Giovani Anton Petró (CRM-RS 45401)\n========================================================\n`;
+        txt += `CONTAGEM DE SINTOMAS SIGNIFICATIVOS (Corte DSM-5: >= 6/9):\n`;
+        txt += `• Desatenção: ................... ${symInat}/9 sintoma(s) ativo(s)\n`;
+        txt += `• Hiperatividade/Impulsividade: . ${symHip}/9 sintoma(s) ativo(s)\n\n`;
+        txt += `GRAVIDADE DOS SINTOMAS (Escore Bruto):\n`;
+        txt += `• Escore de Desatenção (Max 27): ${scInat}\n`;
+        txt += `• Escore de Hiperatividade (Max 27): ${scHip}\n`;
+        txt += `• Escore Global Total: ${scInat + scHip}/54\n========================================================\n`;
+        txt += `► PERFIL CLÍNICO SUGERIDO: ${diag}\n`;
+
+        document.getElementById('output').value = txt;
+        document.getElementById('resBox').style.display = "block";
+    }
+</script>
+</body>
+</html>

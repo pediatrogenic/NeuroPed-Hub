@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABILOCO-Kids - Habilidade Locomotora</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Verdana, sans-serif; background: #f8fafc; color: #0f172a; margin: 0; padding: 20px; }
+        .container { max-width: 900px; background: #fff; margin: 0 auto; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h1 { color: #334155; text-align: center; margin-bottom: 5px; }
+        .usage-badge { background: #e2e8f0; color: #334155; padding: 12px 15px; border-radius: 6px; font-size: 14px; font-weight: 500; border-left: 4px solid #475569; margin-bottom: 25px; line-height: 1.5;}
+        .pt-info { display: flex; gap: 15px; margin-bottom: 20px; }
+        .pt-info input { flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; }
+        
+        .item-row { padding: 12px 10px; border-bottom: 1px solid #f1f5f9; display: flex; flex-direction: column; gap: 8px; }
+        @media (min-width: 768px) { .item-row { flex-direction: row; justify-content: space-between; align-items: center; } }
+        .item-text { flex: 1; font-size: 14.5px; color: #1e293b; font-weight: 600;}
+        .opts-group { display: flex; gap: 5px; }
+        .opts-group label { cursor: pointer; font-size: 12px; font-weight: bold; background: #f1f5f9; padding: 8px 12px; border-radius: 4px; border: 1px solid #cbd5e1; flex: 1; text-align: center; white-space: nowrap; transition: 0.2s;}
+        .opts-group label:hover { background: #e2e8f0; }
+        
+        .btn-calc { width: 100%; background: #334155; color: white; padding: 15px; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 25px; transition: 0.2s; }
+        .btn-calc:hover { background: #1e293b; }
+        textarea { width: 100%; height: 260px; margin-top: 20px; padding: 15px; font-family: monospace; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; line-height: 1.5; }
+        footer { margin-top: 30px; text-align: center; font-size: 12px; color: #64748b; border-top: 1px solid #e2e8f0; padding-top: 15px;}
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>ABILOCO-Kids (Habilidade Locomotora)</h1>
+    <div class="usage-badge">
+        <strong>QUANDO USAR:</strong> Inventário de 10 itens para avaliar a <strong>capacidade locomotora dinâmica e coordenação complexa</strong> (desafios de equilíbrio).<br>
+        <strong>PÚBLICO:</strong> Crianças com Paralisia Cerebral e patologias motoras entre <strong>6 e 15 anos de idade</strong>.
+    </div>
+
+    <div class="pt-info">
+        <input type="text" id="ptName" placeholder="Nome do Paciente">
+        <input type="text" id="ptAge" placeholder="Idade Atual">
+    </div>
+
+    <form id="formAbiloco">
+        <div id="questContainer"></div>
+        <button type="button" class="btn-calc" onclick="gerarAbiloco()">Calcular Perfil ABILOCO-Kids</button>
+    </form>
+
+    <textarea id="output" readonly placeholder="O relatório será gerado aqui..."></textarea>
+    
+    <footer>
+        Desenvolvido por Dr. Giovani Anton Petró (CRM-RS 45401)<br>
+        Referência: ABILOCO-Kids: A Rasch-built measure of locomotion ability in children with cerebral palsy.
+    </footer>
+</div>
+<script>
+    const perguntas = [
+        "1. Andar mais de 10 metros dentro de casa?",
+        "2. Andar subindo uma rampa ou ladeira?",
+        "3. Subir escadas colocando apenas um pé em cada degrau?",
+        "4. Correr (os dois pés saem do chão ao mesmo tempo)?",
+        "5. Pular em um pé só?",
+        "6. Andar mais de 50 metros na rua (superfícies diversas)?",
+        "7. Andar em um quarto escuro (sem o apoio da visão)?",
+        "8. Passar por cima de um obstáculo no chão?",
+        "9. Andar carregando um copo cheio de água (dupla tarefa)?",
+        "10. Pular com os dois pés juntos?"
+    ];
+
+    const cont = document.getElementById('questContainer');
+    perguntas.forEach((q, i) => {
+        cont.innerHTML += `
+        <div class="item-row">
+            <div class="item-text">${q}</div>
+            <div class="opts-group">
+                <label><input type="radio" name="abi_${i}" value="0"> Impossível (0)</label>
+                <label><input type="radio" name="abi_${i}" value="1"> Difícil (1)</label>
+                <label><input type="radio" name="abi_${i}" value="2"> Fácil (2)</label>
+            </div>
+        </div>`;
+    });
+
+    function gerarAbiloco() {
+        let sc = 0, ok = true, dificuldades = [];
+        perguntas.forEach((q, i) => {
+            let r = document.querySelector(`input[name="abi_${i}"]:checked`);
+            if(!r) { ok = false; return; }
+            let val = parseInt(r.value);
+            sc += val;
+            if(val === 0 || val === 1) dificuldades.push(`- ${q.substring(3)} [${val===0?'Impossível':'Difícil'}]`);
+        });
+
+        if(!ok) { alert("Responda todos os 10 itens."); return; }
+        
+        let perfil = sc >= 16 ? "Habilidade Locomotora Elevada (Padrão leve/Típico)" : (sc >= 10 ? "Habilidade Locomotora Intermediária (Desafios em equilíbrio/coordenação)" : "Habilidade Locomotora Restrita (Dificuldades em locomoção básica)");
+
+        let txt = `ESCALA DE HABILIDADE LOCOMOTORA (ABILOCO-Kids)\n`;
+        txt += `Paciente: ${document.getElementById('ptName').value || '-'} | Idade: ${document.getElementById('ptAge').value || '-'}\n`;
+        txt += `Data da Consulta: ${new Date().toLocaleDateString('pt-BR')}\n`;
+        txt += `Médico Avaliador: Dr. Giovani Anton Petró (Neuropediatria - CRM-RS 45401 / RQE 47990)\n`;
+        txt += `========================================================\n`;
+        txt += `Escore Bruto Coletado: ${sc}/20 pontos\n`;
+        txt += `Perfil Locomotor Dinâmico: ${perfil}\n\n`;
+        txt += `Mapeamento de Restrições Biomecânicas/Equilíbrio:\n${dificuldades.length > 0 ? dificuldades.join('\n') : '- Nenhuma restrição locomotora identificada nestes domínios.'}\n`;
+        txt += `========================================================\n`;
+        txt += `Nota: O inventário ABILOCO captura os desafios de equilíbrio, dupla tarefa (carregar objetos) e propriocepção (andar no escuro) vivenciados pela criança no cotidiano.`;
+        
+        document.getElementById('output').value = txt;
+    }
+</script>
+</body>
+</html>
